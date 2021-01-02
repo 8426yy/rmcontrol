@@ -1,0 +1,266 @@
+<template>
+    <div class="doc-page">
+        <title-bar title="发现设备" show-back="{{true}}" show-right="{{true}}"></title-bar>
+        <div class="neck">
+            <div class="left-area">
+                <my-spin if={{isfinding}} tip="Loading..."></my-spin>
+                <my-icon else type="bluetooth" size="120" color="#429FD5"></my-icon>
+            </div>
+            <div class="right-area">
+                <input type="button" onclick="startDiscovery" value="扫描设备" />
+                <input type="button" onclick="stopDevicesDiscovery" value="停止扫描" />
+            </div>
+        </div>
+        <div class="line test">
+          <input type="text" value="发送文字与字符"></input>
+          <input type="button" class="clickable" value="发送"></input>
+        </div>
+        <div class="body">
+            <div class="labhead">
+                <label>当前已扫描到的设备数量:{{deviceLen}}</label>
+            </div>
+            <list class="list">
+
+                <list-item class="device" for="{{devices}}" type="dev">
+                    <text class="device-name">{{$item.name}}</text>
+                    <div class="icon-but">
+                        <my-icon type="key" size="50" color="#429FD5" onclick="createBLEConnection($item)"> </my-icon>
+
+                    </div>
+                </list-item>
+            </list>
+        </div>
+        <div class="foot">
+            <my-icon type="bluetooth" size="40" color="#429FD5"> </my-icon>
+            <text>当前绑定设备：{{devicevaild?devicename:'无'}}</text>
+            <input type="button" class="btn" onclick="closeConnection" value="解除绑定"></input>
+        </div>
+    </div>
+
+</template>
+
+<import name="my-spin" src="apex-ui/components/spin/index"></import>
+<import name="my-icon" src="apex-ui/components/icon/index"></import>
+<import name="title-bar" src="../../components/common/bar/title-bar"></import>
+
+<style lang="less">
+@import '../../assets/styles/self.less';
+.neck {
+  flex-direction: row;
+  background-color: #ffffff;
+  height: 20%;
+  margin: 15px 15px 0px 15px;
+}
+.left-area {
+  justify-content: center;
+  align-items: center;
+  width: 35%;
+}
+.right-area {
+  flex-direction: column;
+  border-left-color: #a9a9a9;
+  border-left-width: 2px;
+  padding-right: 10px;
+  padding-left: 10px;
+  justify-content: center;
+  align-items: center;
+  width: 65%;
+  input {
+    margin: 10px;
+    width: 100%;
+    background-color: #0faeff;
+    color: #ffffff;
+    font-size: 30px;
+  }
+}
+
+.doc-page {
+  flex: 1;
+  flex-direction: column;
+  background-color: #d5e2e7;
+}
+
+.text {
+  width: 100%;
+  margin-top: 5px;
+  background-color: white;
+  padding: 3px;
+  margin-top: 1px;
+  font-size: 28px;
+  color: black;
+}
+
+.body {
+  background-color: #f8f8f9;
+  margin: 15px 15px 0px 15px;
+  flex-direction: column;
+}
+.labhead {
+  margin: 5px;
+  background-color: #5cadff;
+  justify-content: center;
+  height: 80px;
+  label {
+    color: #ffffff;
+    font-size: 35px;
+  }
+}
+
+.list {
+  width: 100%;
+  height: 45%;
+}
+
+.device {
+  border: 2px solid #eee;
+  margin: 10px;
+  justify-content: space-between;
+  background-color: #ffffff;
+  height: 70px;
+}
+
+.device-name {
+  line-height: 50px;
+  text-align: center;
+  font-size: 40px;
+}
+
+.list text {
+  color: #333;
+}
+
+.icon-but {
+  width: 20%;
+  justify-content: space-around;
+  height: 100%;
+}
+
+.foot {
+  background-color: #ffffff;
+  margin-top: 15px;
+  height: 10%;
+  justify-content: space-around;
+  align-items: center;
+  text {
+    color: #495060;
+    font-size: 30px;
+  }
+}
+
+.btn {
+  height: 60px;
+  text-align: center;
+  border-radius: 5px;
+  color: #ffffff;
+  font-size: 30px;
+  background-color: #0faeff;
+}
+
+.test
+{
+  background-color: #ffffff;
+  margin: 15px 15px 0px 15px;
+}
+</style>
+
+<script>
+import bluetooth from "@system.bluetooth";
+import prompt from '@system.prompt'
+
+export default {
+    private: {
+        devicevaild: false,
+        notifyEnabled: false,
+        deviceid: '',
+        devices: [],
+        deviceLen: 0,
+        isfinding: false,
+        devicename: "无"
+    },
+    onInit() {
+       
+    },
+    onHide() {
+    },
+
+    startDiscovery() {
+        this.isfinding = true
+        let _this = this
+        // this.$app.$def.bluetoothdiscover().then((device)=>{
+        //     console.log(device)
+        //     _this.devices.push(device)
+        //     _this.deviceLen = _this.devices.length
+        // })
+        bluetooth.ondevicefound = function (data) {
+            console.log("new device list has founded");
+            data.devices.forEach(device => {
+                if (!device.name && !device.localName) {
+                    return
+                }
+                const foundDevices = _this.devices
+                const idx = _this.inArray(foundDevices, 'deviceId', device.deviceId)
+                if (idx === -1) {
+                    _this.devices.push(device)
+                } else {
+                    _this.devices.splice(idx, 1, device)
+                }
+                _this.deviceLen = _this.devices.length
+            });
+        };
+        bluetooth.startDevicesDiscovery({
+            services: ['0000FFE0-0000-1000-8000-00805F9B34FB', '0000FEE7-0000-1000-8000-00805F9B34FB'],
+            allowDuplicatesKey: false,
+            success: function () {
+                console.log(_this.deviceid);
+                console.log("success find");
+            }
+        });
+    },
+    closeConnection() {
+        this.$app.$def.bluecloseconnect()
+        this.devicevaild = false
+    },
+    createBLEConnection(data) {
+        const _this = this
+        this.$app.$def.createBLEConnection(data).then((dev) => {
+            console.log('connect ok')
+            prompt.showToast({
+                message: '连接成功'
+            })
+            _this.devicename = _this.$app.$def.confdata.devicename
+            _this.devicevaild = true
+        }).catch((data,code) => {
+             console.log('connect final fail')
+             console.log(data,code)
+            prompt.showToast({
+                message: '连接失败'
+            })
+        })
+
+
+    },
+    stopDevicesDiscovery() {
+        this.isfinding = false
+        bluetooth.ondevicefound = null
+        bluetooth.stopDevicesDiscovery({
+            success: function () {
+                prompt.showToast({
+                    message: '停止扫描'
+                })
+            },fail:function()
+            {
+                console.log('stop dis fail')
+            }
+        })
+    },
+    inArray(arr, key, val) {
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i][key] === val) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+};
+</script>

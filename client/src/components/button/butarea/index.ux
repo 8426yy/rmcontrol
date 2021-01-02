@@ -1,0 +1,75 @@
+<template>
+    <div id="mainarea" class="mainarea" @touchmove="touchmove">
+        <block for="buttonList">
+            <key class="btn {{$idx==selected?'cur':' '}}" attr="{{$item}}" edit="{{edit}}" @touchstart="touchstart($idx)"> </key>
+        </block>
+    </div>
+
+</template>
+<import name="key" src="../key"></import>
+ 
+<style lang="less">
+.mainarea {
+  justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+}
+
+.cur {
+  border: 5px solid #ff9900;
+}
+
+.center {
+  color: #ffffff;
+  align-self: center;
+}
+
+.btn {
+  position: absolute;
+  background-color: #2d8cf0;
+  justify-content: center;
+  align-items: center;
+  text {
+    color: #ffffff;
+  }
+}
+.btn:active {
+  background-color: #19be6b;
+}
+</style>
+
+<script>
+
+export default {
+    props: {
+        selected: {
+            default: -1
+        },
+        edit: {
+            default: false
+        },
+        buttonList: {
+            default: []
+        },
+        offleft:{
+            default:0
+        },
+        offtop: {
+            default:0
+        }
+    },
+    data: {
+        clickshort: true
+    },
+    touchstart(id, e) {
+        if (this.edit) {
+            this.$emit('selchange', { data: id })
+        }
+    },
+    touchmove(e) {
+        if (this.edit) {
+            this.$emit('locchange', { left: parseInt(e.changedTouches[0].clientX - this.offleft), top: parseInt(e.changedTouches[0].clientY - this.offtop) })
+        }
+    }
+};
+</script>

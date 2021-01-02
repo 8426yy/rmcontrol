@@ -1,0 +1,103 @@
+<template>
+    <div style="left:{{attr.left}}px;top:{{attr.top}}px;width:{{attr.width}}px;height:{{attr.height}}px;border-radius:{{attr.borderradius}}%;" @longpress="longclick" @touchend="touchend">
+        <text class="center" style="font-size:{{attr.fontsize}}px;">{{attr.value|gettext}}</text>
+    </div>
+
+</template>
+
+ 
+<style lang="less">
+.center {
+  color: #ffffff;
+  align-self: center;
+}
+</style>
+
+<script>
+
+export default {
+    props: {
+        attr: {
+            default: {
+                left: 0,
+                top: 0,
+                width: 100,
+                height: 100,
+                borderwidth: 0,
+                borderradius: 0,
+                fontsize: 30,
+                kind: false,
+                value: []
+            }
+        },
+        edit:
+            {
+                default: false
+            }
+    },
+    data: {
+        clickshort: true
+    },
+    gettext(val) {
+        if (val.length == 0)
+            return ""
+        let x = "" + val[0]
+        for (let i = 1; i < val.length; i++) {
+            x = x + ' ' + val[i]
+        }
+        return x
+    },
+    longclick() {
+        this.clickshort = false
+        if (!this.edit) {
+            let len = this.attr.value.length
+            if (len == 1)
+                $socket.send({
+                    kind: 'k',
+                    data: {
+                        word: this.attr.value[0],
+                        operate: 'press'
+                    }
+                })
+            console.log('longclick')
+        }
+
+    },
+    touchend() {
+        if (!this.edit) {
+            let len = this.attr.value.length
+            console.log(len, this.attr.value, this.clickshort)
+            if (len == 0)
+                return
+            if (len > 1) {
+                $socket.send({
+                    kind: 'h',
+                    data: this.attr.value
+                })
+                this.clickshort = true
+                return
+            }
+            if (!this.clickshort) {
+                    $socket.send({
+                        kind: 'k',
+                        data: {
+                            word: this.attr.value[0],
+                            operate: 'reserve'
+                        }
+                    })
+                this.clickshort = true
+            }
+            else {
+                    $socket.send({
+                        kind: 'k',
+                        data: {
+                            word: this.attr.value[0],
+                            operate: 'click'
+                        }
+                    })
+                console.log('click')
+            }
+        }
+    }
+};
+</script>

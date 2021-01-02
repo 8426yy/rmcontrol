@@ -1,0 +1,104 @@
+<template>
+  <div class="title-bar main-title">
+    <text class="back iconfont" if="showBack" onclick="goBack">&#xe606;</text>
+    <text class="center-title">{{ title }}</text>
+    <text class="iconfont menu" onclick="showMenu" style="visibility:{{showRight?'visible':'hidden'}}">&#xe60c;</text>
+    <my-fab-button theme="positive" position="bottomRight" buttons="{{buttons}}" reverse="{{true}}"></my-fab-button>
+  </div>
+</template>
+<import name="my-icon" src="apex-ui/components/icon/index"></import>
+<import name="my-fab-button" src="apex-ui/components/fab-button/index"></import>
+<script>
+import router from '@system.router'
+export default {
+  data() {
+    return {
+      buttons: [
+        {
+          type: 'primary',
+          icon: 'finger-print',
+          label: '鼠标',
+          shape: 'circle',
+          click: () => {
+            router.replace({
+              uri: 'pages/mouse'
+            })
+          }
+        },
+        {
+          type: 'primary',
+          icon: 'card',
+          label: '键盘',
+          shape: 'circle',
+          click: () => {
+             router.replace({
+              uri: 'pages/control'
+            })
+          }
+        },
+        {
+          type: 'primary',
+          icon: 'mail',
+          label: '文本',
+          shape: 'circle',
+          click: () => { 
+            router.replace({
+              uri: 'pages/horsentense'
+            })
+  
+          }
+        },
+
+        {
+          type: 'primary',
+          icon: 'link',
+          label: '连接',
+          shape: 'circle',
+          click: () => { 
+             router.replace({
+              uri: 'pages/socket'
+            })
+          }
+        },
+
+
+      ],
+      num: 1
+    }
+  },
+  props: {
+    showBack: {
+      default: false
+    },
+
+    showRight:
+      {
+        default: true
+      },
+    title: {}
+  },
+  /* -------------------SelfCustomEvent------------------ */
+  goBack() {
+    router.back()
+  },
+  showMenu() {
+    this.$app.$def.showMenu()
+  }
+}
+</script>
+
+<style lang="less">
+@import "../../../assets/styles/index.less";
+.center-title {
+  flex: 1;
+  .text-black;
+  font-size: 40px;
+  text-align: center;
+}
+.main-title {
+  background-color: #2d8cf0;
+  text {
+    color: #f0f8ff;
+  }
+}
+</style>

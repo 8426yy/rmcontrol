@@ -1,0 +1,75 @@
+<template>
+  <div class="title-bar">
+    <text class="back iconfont" onclick="goBack">&#xe606;</text>
+    <div class="search">
+      <text class="iconfont search-icon">&#xe661;</text>
+      <input type="text" id="search-input" class="search-input" placeholder="请输入关键字" value="{{searchText}}" onchange="change" />
+    </div>
+    <div class="righticon">
+      <my-icon type="search" size="60" color="#80848f" onclick="search"></my-icon>
+      <my-icon type="qr-scanner" size="60" color="#80848f" onclick="scan"></my-icon>
+    </div>
+
+  </div>
+</template>
+<import name="my-icon" src="apex-ui/components/icon/index"></import>
+<script>
+import router from '@system.router'
+import barcode from '@system.barcode'
+export default {
+  data: {
+    searchText: ''
+  },
+  onReady() {
+    this.$element('search-input').focus({ focus: true })
+  },
+  change(e) {
+    this.searchText = e.value
+  },
+  /* -------------------SelfCustomEvent------------------ */
+  search(e) {
+    if (this.searchText.length > 0) {
+      this.$emit('search', this.searchText)
+    }
+  },
+  scan(e) {
+    let self = this
+    barcode.scan({
+      success: function (data) {
+        let reg = /^\d+$/
+        if (reg.test(data.result)) {
+          self.searchText = data.result
+          self.$emit('scan', data.result)
+        }
+        else {
+          prompt.showToast({
+            message: "非法的条形码输入"
+          })
+        }
+
+      },
+      fail: function (data, code) {
+        prompt.showToast({
+          message: "获取条形码失败"
+        })
+      }
+    })
+
+  },
+  toscan() {
+    $utils.route2theUrl('pages/codescan', {})
+  },
+
+  goBack() {
+    router.back()
+  }
+}
+</script>
+
+<style lang="less">
+@import '../../../assets/styles/index.less';
+.righticon {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+</style>

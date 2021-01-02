@@ -1,0 +1,78 @@
+<template>
+  <list class="text-list" onscrollbottom="loadMore">
+    <list-item type="textItem" class="text-item" for="{{list}}" onclick="detail($item)">
+      <div class="column">
+          <div class="main">
+              <text>{{$item.goods_name}}</text>
+              <text>{{$item.c1}}</text>
+          </div>
+          <div class="foot">
+              <text>{{$item.manufacturer}}</text>
+              <text>{{$item.is_otc==0?'otc':'非otc'}}</text>
+              <text>{{$item.bar_code}}</text>
+          </div>
+      </div>
+    </list-item>
+      <list-item type="loadMore" class="load-status" if="showLoad">
+      <my-load-more tip="加载更多" ></my-load-more>
+    </list-item>
+    <list-item type="noMore" class="load-status" if="!showLoad">
+      <my-load-more tip="没有更多内容了" loading="{{ false }}" ></my-load-more>
+    </list-item>
+  </list>
+</template>
+<import name="my-load-more" src="apex-ui/components/load-more/index"></import>
+<script>
+export default {
+  props: {
+    list: {},
+    showLoad:{
+      default:true
+    }
+  },
+  /* -------------------SelfCustomEvent------------------ */
+  detail(item) {
+      $utils.route2theUrl('pages/drugdetail',{goods_id:item.goods_id})
+  },
+   loadMore() {
+     console.log('loadmore')
+    this.$emit('loadMore')
+  }
+}
+</script>
+
+<style lang="less">
+@import '../../../assets/styles/index.less';
+
+.text-list {
+  padding-left: @gap-3;
+  background-color: @white;
+}
+.text-item {
+  width: 100%;
+  padding: 40px;
+  .border-bottom-mixins();
+}
+.column
+{
+  flex-direction: column;
+  width: 97%;
+}
+.main
+{
+  justify-content: space-between;
+  text
+  {
+    font-size: 40px;
+    color: #000000;
+  }
+}
+.foot
+{
+  justify-content:  space-between;
+  text
+  {
+    font-size: 20px;
+  }
+}
+</style>

@@ -1,0 +1,595 @@
+<template>
+    <div class="hor-page">
+        <title-bar title="{{title}}" show-back="{{true}}" show-right="{{true}}"></title-bar>
+        <div class="title">
+            <div class="title-left">
+                <tabs index="{{tabindex}}" onchange="tabchange">
+                    <tab-bar class="tab-bar" mode="scrollable">
+                        <div>
+                            <block for="tablist">
+                                <div class="bar {{$idx==tabindex?'bar-active':' '}}" onclick="choose($idx)">
+                                    <div class="icon">
+                                        <label class="{{$idx==tabindex?'lab-active':'lab'}}">{{$idx}}</label>
+                                    </div>
+                                </div>
+                            </block>
+                        </div>
+
+                    </tab-bar>
+                </tabs>
+            </div>
+
+            <div class="title-right">
+                <div>
+                    <div class="bar bar-active" onclick="addpage">
+                        <div class="icon btn">
+                            <my-icon type="add-circle-o" color="#ffffff" size="40"></my-icon>
+                        </div>
+                    </div>
+                    <div class="bar bar-active" onclick="delselect">
+                        <div class="icon btn">
+                            <my-icon type="trash" color="#ffffff" size="40"></my-icon>
+                        </div>
+                    </div>
+                    <div class="bar bar-active" onclick="editchange">
+                        <div class="icon btn">
+                            <my-icon type="options" color="#ffffff" size="40"></my-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <tabs id="mainarea" class="tabs" index="{{tabindex}}" onchange="tabchange">
+            <tab-content class="tab-content" scrollable="false" onresize="resize">
+                <div for="tablist" class="main">
+                    <butarea edit="{{edit}}" selected="{{selected}}" button-list="{{$item.buttonlist}}" offleft="{{offleft}}" offtop="{{offtop}}" onselchange="selchange" onlocchange="locchange" ></butarea>
+                    <div show="{{edit}}" class="menu">
+                        <list>
+                            <list-item type="" class="list-item">
+                                <div class="between">
+                                    <input class="icon" type="button" value="删除" onclick="delbutton"></input>
+                                    <input class="icon" type="button" value="添加" onclick="addbutton"></input>
+                                </div>
+
+                            </list-item>
+                            <list-item type="" class="list-item">
+                                <label>当前id:{{selected}}</label>
+                            </list-item>
+                             <list-item type="" class="list-item">
+                                 <div class="between">
+                                     <label>标题:</label>
+                                     <input type="text" value="{{title}}" onchange="titlechange"></input>
+                                 </div>
+                                
+                            </list-item>
+                            <list-item type="" class="list-item">
+                                <label>left:{{curvalue.left}}</label>
+                                <slider class="slider" min="0" max="{{width}}" step="10" value="{{curvalue.left}}" onchange="valchange('left')"></slider>
+                            </list-item>
+                            <list-item type="" class="list-item">
+                                <label>top:{{curvalue.top}}</label>
+                                <slider class="slider" min="0" max="{{height}}" step="10" value="{{curvalue.top}}" onchange="valchange('top')"></slider>
+                            </list-item>
+                            <list-item type="" class="list-item">
+                                <label>width:{{curvalue.width}}</label>
+                                <slider class="slider" min="0" max="{{width}}" step="10" value="{{curvalue.width}}" onchange="valchange('width')"></slider>
+                            </list-item>
+                            <list-item type="" class="list-item">
+                                <label>height:{{curvalue.height}}</label>
+                                <slider class="slider" min="0" max="{{height}}" step="10" value="{{curvalue.height}}" onchange="valchange('height')"></slider>
+                            </list-item>
+                            <list-item type="" class="list-item">
+                                <label>bor-raddius:{{curvalue.borderradius}}</label>
+                                <slider class="slider" min="0" max="50" step="5" value="{{curvalue.borderradius}}" onchange="valchange('borderradius')"></slider>
+                            </list-item>
+
+                            <list-item type="" class="list-item">
+                                <label>font-size:{{curvalue.fontsize}}</label>
+                                <slider class="slider" min="20" max="100" step="5" value="{{curvalue.fontsize}}" onchange="valchange('fontsize')"></slider>
+                            </list-item>
+                            <list-item type="" class="list-item">
+                                <div class="around">
+                                    <label>单键</label>
+                                    <switch class="switch" checked="{{curvalue.kind}}" onchange="kindchange" />
+                                    <label>多键</label>
+                                </div>
+                            </list-item>
+                            <list-item type="" class="list-item">
+                                <text>键值:{{curvalue.value|gettext}}</text>
+                                  <select class="select" onchange="keychange">
+                                      <option for="keylist" value="{{$idx}}" selected="{{$idx==curkey}}">{{$item}}</option>
+                                  </select>
+                                  <div class="around" >
+                                    <input class="icon" type="button" value="添加键值" onclick="addvalue"></input>
+                                    <input class="icon" type="button" value="删除键值" onclick="delvalue"></input>
+                                  </div>
+                            </list-item>
+
+                        </list>
+                    </div>
+                </div>
+
+            </tab-content>
+        </tabs>
+
+    </div>
+
+</template>
+
+<import name="title-bar" src="../../components/common/bar/title-bar"></import>
+<import name="butarea" src="../../components/button/butarea"></import>
+ <import name="my-input-number" src="apex-ui/components/input-number/index"></import>
+<import name="my-icon" src="apex-ui/components/icon/index"></import>
+<style lang="less">
+@import "../../assets/styles/self.less";
+.body {
+  width: 100%;
+  height: 88%;
+}
+.tab-bar {
+  width: 100%;
+  background-color: #f8f8f9;
+  /* justify-content: space-between; */
+}
+.bar {
+  width: 100px;
+  height: 100px;
+  background-color: #f8f8f9;
+  justify-content: center;
+  padding: 5px;
+  border-right: 2px solid #bbbec4;
+}
+.bar-active {
+  background-color: #2d8cf0;
+}
+.lab-active {
+  color: #ffffff;
+}
+.icon {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  border: 5px solid #f8f8f9;
+}
+.tabs {
+  border: 5px solid#2d8cf0;
+}
+.tab-content {
+  border-top: 5px solid#2d8cf0;
+  background-color: #f8f8f9;
+  height: 500px;
+}
+
+.list-item {
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 2px 4px 2px 4px;
+  border-bottom: 1px solid #dddee1;
+}
+.title {
+  width: 100%;
+  justify-content: space-between;
+  align-content: center;
+  margin-top: 5px;
+  border-top: 5px solid#2d8cf0;
+}
+.title-left {
+  width: 80%;
+}
+.title-right {
+  width: 300px;
+}
+.main {
+  width: 100%;
+  height: 560px;
+}
+
+.menu {
+  width: 30%;
+  opacity: 1;
+  border-left: 5px solid#2d8cf0;
+  background-color: rgba(192, 192, 192, 0.11);
+  color: #ffffff;
+  height: 100%;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}
+
+.slider {
+  selected-color: #2d8cf0;
+  block-color: #2d8cf0;
+}
+
+.switch {
+  thumb-color: #2d8cf0;
+  track-color: rgb(158, 205, 253);
+}
+.between
+{
+    justify-content: space-between;
+}
+.around
+{
+    justify-content: space-around;
+}
+.btn:active
+{
+    background-color: #19be6b;
+}
+.select
+{
+    width: 100%;
+    background-color: #ffffff;
+}
+</style>
+
+<script>
+import prompt from '@system.prompt'
+import router from '@system.router'
+function isin(val,list)
+{
+    for(let i in list)
+    {
+        if(list[i]==val)
+        return true
+    }
+    return false
+}
+export default {
+    private: {
+        selected: -1,
+        tabindex: 0,
+        edit: false,
+        curkey:0,
+        width: 1000,
+        height: 400,
+        offleft:0,
+        offtop:0,
+        keylist:['!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~', 'accept', 'add', 'alt', 'altleft', 'altright', 'apps', 'backspace', 'browserback', 'browserfavorites', 'browserforward', 'browserhome', 'browserrefresh', 'browsersearch', 'browserstop', 'capslock', 'clear', 'convert', 'ctrl', 'ctrlleft', 'ctrlright', 'decimal', 'del', 'delete', 'divide', 'down', 'end', 'enter', 'esc', 'escape', 'execute', 'f1', 'f10', 'f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18', 'f19', 'f2', 'f20', 'f21', 'f22', 'f23', 'f24', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'final', 'fn', 'hanguel', 'hangul', 'hanja', 'help', 'home', 'insert', 'junja', 'kana', 'kanji', 'launchapp1', 'launchapp2', 'launchmail', 'launchmediaselect', 'left', 'modechange', 'multiply', 'nexttrack', 'nonconvert', 'num0', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8', 'num9', 'numlock', 'pagedown', 'pageup', 'pause', 'pgdn', 'pgup', 'playpause', 'prevtrack', 'print', 'printscreen', 'prntscrn', 'prtsc', 'prtscr', 'return', 'right', 'scrolllock', 'select', 'separator', 'shift', 'shiftleft', 'shiftright', 'sleep', 'stop', 'subtract', 'tab', 'up', 'volumedown', 'volumemute', 'volumeup', 'win', 'winleft', 'winright', 'yen', 'command', 'option', 'optionleft', 'optionright'],
+        tablist: [
+            {
+                title: '默认',
+                buttonlist: [
+                    {
+                        left: 300,
+                        top: 100,
+                        width: 200,
+                        height: 100,
+                        borderwidth: 0,
+                        borderradius: 0,
+                        fontsize: 50,
+                        kind: false,
+                        value: ['w']
+                    }, 
+                    {
+                        left: 100,
+                        top: 200,
+                        width: 200,
+                        height: 100,
+                        borderwidth: 0,
+                        borderradius: 0,
+                        fontsize: 50,
+                        kind: false,
+                        value: ['a']
+                    },
+                     {
+                        left: 300,
+                        top: 300,
+                        width: 200,
+                        height: 100,
+                        borderwidth: 0,
+                        borderradius: 0,
+                        fontsize: 50,
+                        kind: false,
+                        value: ['s']
+                    },
+                     {
+                        left: 500,
+                        top: 200,
+                        width: 200,
+                        height: 100,
+                        borderwidth: 0,
+                        borderradius: 0,
+                        fontsize: 50,
+                        kind: false,
+                        value: ['d']
+                    }
+                ]
+            },
+            {
+                title: '默认',
+                buttonlist: [
+                    {
+                        left: 50,
+                        top: 50,
+                        width: 250,
+                        height: 100,
+                        borderwidth: 0,
+                        borderradius: 0,
+                        fontsize: 50,
+                        kind: false,
+                        value: ['esc']
+                    },
+                     {
+                        left: 900,
+                        top: 50,
+                        width: 250,
+                        height: 100,
+                        borderwidth: 0,
+                        borderradius: 0,
+                        fontsize: 50,
+                        kind: false,
+                        value: ['backspace']
+                    },
+                    {
+                        left: 900,
+                        top: 350,
+                        width: 250,
+                        height: 100,
+                        borderwidth: 0,
+                        borderradius: 0,
+                        fontsize: 50,
+                        kind: false,
+                        value: ['enter']
+                    },
+                    {
+                        left: 50,
+                        top: 350,
+                        width: 250,
+                        height: 100,
+                        borderwidth: 0,
+                        borderradius: 0,
+                        fontsize: 50,
+                        kind: false,
+                        value: ['enter']
+                    },
+                    {
+                        left: 100,
+                        top: 200,
+                        width: 200,
+                        height: 100,
+                        borderwidth: 0,
+                        borderradius: 0,
+                        fontsize: 50,
+                        kind: true,
+                        value: ['ctrl','z']
+                    }
+                    ,{
+                        left: 300,
+                        top: 200,
+                        width: 200,
+                        height: 100,
+                        borderwidth: 0,
+                        borderradius: 0,
+                        fontsize: 50,
+                        kind: true,
+                        value: ['ctrl','x']
+                    },
+                    {
+                        left: 500,
+                        top: 200,
+                        width: 200,
+                        height: 100,
+                        borderwidth: 0,
+                        borderradius: 0,
+                        fontsize: 50,
+                        kind: true,
+                        value: ['ctrl','c']
+                    },{
+                        left: 700,
+                        top: 200,
+                        width: 200,
+                        height: 100,
+                        borderwidth: 0,
+                        borderradius: 0,
+                        fontsize: 50,
+                        kind: true,
+                        value: ['ctrl','v']
+                    },{
+                        left: 900,
+                        top: 200,
+                        width: 200,
+                        height: 100,
+                        borderwidth: 0,
+                        borderradius: 0,
+                        fontsize: 50,
+                        kind: true,
+                        value: ['ctrl','y']
+                    }
+                ]
+            },
+            {
+                title: '默认',
+                buttonlist: [
+                    {
+                        left: 0,
+                        top: 0,
+                        width: 100,
+                        height: 100,
+                        borderwidth: 0,
+                        borderradius: 0,
+                        fontsize: 0,
+                        kind: false,
+                        value: []
+                    }
+                ]
+            }
+        ]
+    },
+    computed: {
+        curvalue() {
+            return this.selected == -1 ? {
+                left: 0,
+                top: 0,
+                width: 0,
+                height: 0,
+                borderwidth: 0,
+                borderradius: 0,
+                fontsize: 0,
+                kind: false,
+                value: []
+            } : this.tablist[this.tabindex].buttonlist[this.selected]
+        },
+        title() {
+            if (this.tablist.length < 0)
+                return "自定义控件"
+            else
+                return this.tablist[this.tabindex].title
+        }
+    },
+    onShow() {
+        const self=this
+          this.$element('mainarea').getBoundingClientRect({
+            success: function (data) {
+                const { top, bottom, left, right, width, height } = data;
+                self.offleft = left
+                self.offtop = top
+            }
+        })
+    },
+    choose(idx) {
+          this.selected = -1
+        this.tabindex = idx
+    },
+    gettext(val) {
+      if(val.length==0)
+        return ""
+        let x = ""+val[0]
+        for (let i=1;i<val.length;i++) {
+            x = x + ' ' + val[i]
+        }
+        return x
+    },
+    tabchange(e) {
+        this.selected = -1
+        this.tabindex = e.index
+    },
+    valchange(key, e) {
+        if (this.edit && this.selected != -1 && e.isFromUser) {
+            this.tablist[this.tabindex].buttonlist[this.selected][key] = e.progress
+        }
+
+    },
+    selchange(e) {
+        this.selected = e.detail.data
+    },
+    locchange(e)
+    {
+        if(this.selected!=-1)
+        {
+        this.tablist[this.tabindex].buttonlist[this.selected]['left'] = e.detail.left
+        this.tablist[this.tabindex].buttonlist[this.selected]['top'] = e.detail.top
+        }
+    },
+    editchange() {
+        if (this.edit) {
+            this.selected = -1
+        }
+        this.edit = !this.edit
+    },
+    kindchange(e) {
+        if (this.edit && this.selected != -1) {
+            this.tablist[this.tabindex].buttonlist[this.selected]['kind'] = e.checked
+            if(!e.checked)
+            this.tablist[this.tabindex].buttonlist[this.selected]['value'] = []
+        }
+    },
+    keychange(e)
+    {
+    this.curkey = e.newValue
+    },
+    resize(e) {
+        this.width = e.offsetWidth
+        this.height = e.offsetHeight
+    },
+    delselect()
+    {
+        if(this.tablist.length>1)
+        {
+            this.selected=-1
+            this.tablist.splice(this.tabindex,1)
+            this.tabindex=0
+          
+        }
+        
+    },
+    titlechange(e)
+    {
+        if (this.edit) 
+        {
+            this.tablist[this.tabindex].title=e.value
+        }
+    },
+    addpage()
+    {
+        this.tablist.push({
+                title: '默认',
+                buttonlist: []
+        })
+        this.selected=-1
+        this.tabindex=this.tablist.length-1
+    },
+    addbutton()
+    {
+        if(this.edit)
+        {
+            this.tablist[this.tabindex].buttonlist.push({
+                left: 0,
+                top: 0,
+                width: 100,
+                height: 100,
+                borderwidth: 0,
+                borderradius: 0,
+                fontsize: 30,
+                kind: false,
+                value: []
+            })
+            this.selected=this.tablist[this.tabindex].buttonlist.length-1
+        }
+    },
+    delbutton()
+    {   if(this.edit&&this.selected!=-1)
+        if(this.tablist[this.tabindex].buttonlist.length>0)
+        {
+           this.tablist[this.tabindex].buttonlist.splice(this.selected,1)
+           this.selected=this.tablist[this.tabindex].buttonlist.length>0?0:-1
+         
+        }
+    },
+    addvalue()
+    {   
+        if(this.edit&&this.selected!=-1)
+        {
+        
+            if(this.curvalue.kind)
+            {
+                if(!isin(this.keylist[this.curkey], this.curvalue.value))
+                this.tablist[this.tabindex].buttonlist[this.selected].value.push(this.keylist[this.curkey])
+            }
+            else
+            {
+                this.tablist[this.tabindex].buttonlist[this.selected].value=[this.keylist[this.curkey]]
+            }
+              console.log(this.curvalue)
+        }
+    },
+    delvalue()
+    {
+         if(this.edit&&this.selected!=-1)
+        {
+          
+            if(this.curvalue.kind)
+            {
+                if(this.tablist[this.tabindex].buttonlist[this.selected].value.length>1)
+                this.tablist[this.tabindex].buttonlist[this.selected].value.pop()
+            }
+            else
+            {
+             this.tablist[this.tabindex].buttonlist[this.selected].value=[]
+            }
+              console.log(this.curvalue)
+        }
+    }
+};
+</script>

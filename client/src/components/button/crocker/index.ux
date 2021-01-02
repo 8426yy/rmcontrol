@@ -1,0 +1,46 @@
+<template>
+    <div class="hor-page">
+        <title-bar title="摇杆" show-back="{{true}}" show-right="{{true}}"></title-bar>
+        <div class="body">
+            <div class="rocker" >
+              <my-rocker id="main"></my-rocker>
+            </div>
+         
+        </div>
+
+    </div>
+
+</template>
+
+<import name="my-icon" src="apex-ui/components/icon/index"></import>
+<import name="my-rocker" src="../../components/button/rocker"></import>
+<import name="title-bar" src="../../components/common/bar/title-bar"></import>
+
+<style lang="less">
+@import "../../assets/styles/self.less";
+.body{
+width:100%;
+height: 89%;
+background-color: #ffffff;
+justify-content: center;
+align-items: center;
+}
+.rocker{
+    width:400px;
+    height:400px;
+}
+
+
+</style>
+
+<script>
+import prompt from '@system.prompt'
+import router from '@system.router'
+import * as can from './canvas.js'
+export default {
+    private: {
+
+    },
+ 
+};
+</script>

@@ -1,0 +1,126 @@
+<import name="my-load-more" src="apex-ui/components/load-more/index"></import>
+
+<template>
+  
+   <list class="list-container" onscrollbottom="loadMore" style="margin-top:15px">
+  
+      
+    <list-item
+      type="{{$item.image ? 'item-image' : 'item-no-image'}}"
+      class="item-no-image"
+      for="{{list}}"
+      onclick="detail($item)"
+    >
+
+
+    
+
+        <!-- <div class="div1">
+          <text class="list-rank-text">{{ $idx + 1}}</text>
+        </div> -->
+        
+        <div class="div1">
+          <text class="list-rank-text"> {{$item.title}}</text>
+         </div>
+
+
+        <div class="div2">
+          <text class="text-remark">{{ $item.remark }}</text>
+        </div>
+
+
+    </list-item>
+
+
+    <list-item type="loadMore" class="load-status" if="showLoad">
+      <my-load-more tip="加载更多" ></my-load-more>
+    </list-item>
+
+
+    <list-item type="noMore" class="load-status" if="!showLoad">
+      <my-load-more tip="没有更多内容了" loading="{{ false }}" ></my-load-more>
+    </list-item>
+  </list>
+</template>
+
+<script>
+import router from '@system.router'
+export default {
+  props: {
+    list: {},
+    showRank: {
+      default: false
+    },
+    showLoad: {
+      default: true
+    }
+  },
+  /* -------------------SelfCustomEvent------------------ */
+  detail(item) {
+    // 根据id查询详情
+    console.log(item.id)
+    $utils.route2theUrl('pages/article', { articleId: item.id })
+  },
+  loadMore() {
+    this.$emit('loadMore')
+  }
+}
+</script>
+
+<style lang="less">
+@import '../../../assets/styles/index.less';
+
+.article-item {
+  .list-item;
+  .flex-box-mixins(row, space-between, flex-start);
+  .list-text {
+    flex: 1;
+    height: 100%;
+    .flex-box-mixins(column, space-between, center);
+    .list-title {
+      width: 100%;
+    }
+    .list-subtitle {
+      .flex-box-mixins(row, space-between, center);
+      width: 100%;
+    }
+    .list-time {
+      width: 200px;
+      text-align: right;
+    }
+  }
+
+  .list-image {
+    width: 240px;
+    height: 180px;
+    margin-left: @gap-3;
+    background-color: @white-grey;
+    border-radius: 8px;
+  }
+} 
+.div4
+{
+width: 50%;
+    border: 1px solid #000000;
+padding: 5px;
+
+}
+.div1
+  {
+    width: 50%;
+    height: 120px;
+    border: 1px solid #000000;
+padding: 5px;
+
+  }
+.div2
+{
+     width: 100%;
+
+    border: 1px solid #000000;
+}
+.item-image {
+  height: 240px;
+}
+
+</style>

@@ -1,0 +1,192 @@
+<template>
+    <div class="hor-page">
+        <title-bar title="文本输入" show-back="{{true}}" show-right="{{true}}"></title-bar>
+        <div class="line">
+            <my-icon type='save' color="#293849" size="50" @click="save"></my-icon>
+            <my-icon type='undo' color="#293849" size="50"  @click="undo"></my-icon>
+            <my-icon type='share-alt' color="#293849" size="50"  @click="redo"></my-icon>
+
+            <my-icon if="flash" type='flash' color="#293849" size="50" @click="flashchange"></my-icon>
+            <my-icon else type='flash-off' color="#293849" size="50" @click="flashchange"></my-icon>
+            <my-icon type='sync' color="#293849" size="50" @click="cut"></my-icon>
+        </div>
+        <div id="in" class="line">
+            <input id="word" type="text" value="{{word}}" placeholder="发送文字与字符" onchange="wordchange" @enterkeyclick="enter"></input>
+            <input type="button" class="clickable bt-2" value="发送" onclick="send"></input>
+        </div>
+        <div class="line" id="body">
+            <div class="line lab">
+                <div>
+                    <label>开启记录:{{record?'是':'否'}}</label>
+                    <switch checked="{{record}}" onchange="recordchange" />
+                </div>
+                <div>
+                    <input type="button" class="clickable " value="复制" onclick="copy"></input>
+                    <input type="button" class="clickable " value="清空" onclick="clear"></input>
+                </div>
+            </div>
+            <div id="article">
+                <text>{{history}}
+                </text>
+            </div>
+        </div>
+
+    </div>
+
+</template>
+
+<import name="my-icon" src="apex-ui/components/icon/index"></import>
+<import name="title-bar" src="../../components/common/bar/title-bar"></import>
+
+<style lang="less">
+@import "../../assets/styles/self.less";
+#word {
+  width: 75%;
+}
+#in {
+  height: 150px;
+}
+.clickable text {
+  font-size: 35px;
+}
+
+switch {
+  thumb-color: #2d8cf0;
+  track-color: rgb(158, 205, 253);
+}
+#body {
+  height: 50%;
+  background-color: #ffffff;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 5px;
+}
+.lab {
+  width: 100%;
+  height: 60px;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+#article {
+  align-items: flex-start;
+
+  padding: 20px;
+  width: 100%;
+  height: 50%;
+  text {
+    font-size: 30px;
+  }
+}
+</style>
+
+<script>
+import prompt from '@system.prompt'
+import clipboard from '@system.clipboard'
+import router from '@system.router'
+
+export default {
+    private: {
+        word: '',
+        record: false,
+        history: '输入记录在这里查看\n',
+        flash: true,
+
+    },
+    wordchange(e) {
+        let wor = e.value
+        this.word = wor
+        const self = this
+        if (this.flash) {
+            if (wor != '') {
+                $socket.send({ kind: 'w', data: wor })
+                if (this.record)
+                    this.history += wor
+                setTimeout(() => {
+                    self.clearword()
+                }, 100)
+            }
+
+        }
+
+    },
+    enter(e) {
+        if (this.flash) {
+            $socket.send({                kind: 'k', data: {
+                    'word': 'Enter',
+                    'operate': 'click'
+                }            })
+
+        }
+        else {
+            this.send()
+            $socket.send({
+                kind: 'k', data: {
+                    'word': 'Enter',
+                    'operate': 'click'
+                }            })
+        }
+        this.$element('word').focus()
+    },
+    clearword() {
+        this.word = ''
+    },
+    send() {
+        console.log(this.word)
+        if (this.word != '') {
+            if (this.record)
+                this.history += this.word
+            $socket.send({ kind: 'w', data: this.word })
+            this.word = ''
+        } else {
+            prompt.showToast({ message: '请输入文字' })
+        }
+    },
+    recordchange(e) {
+        this.record = e.checked
+        console.log(this.record)
+    },
+    flashchange() {
+        this.flash = !this.flash
+    },
+    copy() {
+        const self=this
+        clipboard.set({
+            text:self.history,
+            success: () => {
+                prompt.showToast({ message: '成功复制到剪切板' })
+            },
+            fail: () => {
+                prompt.showToast({ message: '复制失败' })
+            }
+        })
+    },
+    clear() {
+        this.history = ''
+    },
+    save() {
+        $socket.send({
+            kind: 'h',
+            data: ['ctrl', 's']
+        })
+    },
+    undo() {
+        $socket.send({
+            kind: 'h',
+            data: ['ctrl', 'z']
+        })
+    },
+    redo() {
+        $socket.send({
+            kind: 'h',
+            data: ['ctrl', 'y']
+        })
+    },
+    cut() {
+        router.replace({
+            uri: 'pages/versentense'
+        })
+    }
+};
+</script>

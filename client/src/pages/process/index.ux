@@ -1,0 +1,207 @@
+<template>
+    <div class="hor-page">
+        <title-bar title="窗口进程" show-back="{{true}}" show-right="{{true}}"></title-bar>
+        <div class="body">
+            <div class="line">
+                <select class="select" onchange="winchange">
+                    <option class="option" for="{{windowlist}}" value="{{$idx}}" selected="{{$idx==cur}}">
+                        {{$item.proc}}
+                    </option>
+
+                </select>
+                <input type="button" class="clickable but-0 " value="刷新" @click="wincon('all')"></input>
+            </div>
+            <div class="line">
+                <label>窗口标题</label>
+                <text>{{current.title}}</text>
+            </div>
+            <div class="line">
+                <label>窗口句柄</label>
+                <text>{{current.hwnd}}</text>
+            </div>
+            <div class="line">
+                <label>进程PID</label>
+                <text>{{current.pid}}</text>
+            </div>
+            <div class="line">
+                <label>上</label>
+                <text>{{current.size.top}}</text>
+                <label>左</label>
+                <text>{{current.size.left}}</text>
+            </div>
+            <div class="line">
+                <label>宽</label>
+                <text>{{current.size.width}}</text>
+                <label>高</label>
+                <text>{{current.size.width}}</text>
+            </div>
+            <div class="line">
+                <label>窗口状态</label>
+                <text>{{current.state}}</text>
+            </div>
+            <div class="main">
+                <div>
+                    <input type="button" class="clickable but-1" value="获取活动窗口" @click="getactive"></input>
+                    <input type="button" class="clickable but-1" value="设为前景窗口" @click="wincon('set')"></input>
+                    <input type="button" class="clickable but-1" value="切换前景窗口" @click="wincon('tab')"></input>
+                </div>
+                <div>
+                    <input type="button" class="clickable but-1" value="最小化" @click="wincon('min')"></input>
+                    <input type="button" class="clickable but-1" value="最大化" @click="wincon('max')"></input>
+                    <input type="button" class="clickable but-1" value="正常" @click="wincon('nor')"></input>
+                </div>x
+                <div>
+                    <input type="button" class="clickable but-1" value="置顶窗口" @click="wincon('top')"></input>
+                    <input type="button" class="clickable but-1" value="取消置顶" @click="wincon('ctop')"></input>
+                    <input type="button" class="clickable but-1" value="恢复窗口" @click="wincon('res')"></input>
+                </div>
+                <div>
+                    <input type="button" class="clickable but-1" value="隐藏" @click="wincon('inv')"></input>
+                    <input type="button" class="clickable but-1" value="结束进程" @click="wincon('offp')"></input>
+                    <input type="button" class="clickable but-1" value="关闭" @click="wincon('offw')"></input>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</template>
+
+<import name="my-icon" src="apex-ui/components/icon/index"></import>
+<import name="title-bar" src="../../components/common/bar/title-bar"></import>
+
+<style lang="less">
+@import "../../assets/styles/self.less";
+.body {
+  width: 100%;
+  height: 1200px;
+  flex-direction: column;
+}
+.main {
+  background-color: #ffffff;
+  margin: 15px 15px 0px 15px;
+  flex-direction: column;
+  height: 500px;
+  div {
+    margin: 10px 10px 10px 10px;
+    align-items: center;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+.select {
+  width: 70%;
+  font-size: 40px;
+}
+.option
+{
+    font-size: 40px;
+}
+
+.but-0 {
+  width: 25%;
+}
+.but-1 {
+  width: 33%;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+</style>
+
+<script>
+import prompt from '@system.prompt'
+import clipboard from '@system.clipboard'
+import router from '@system.router'
+let state = null
+export default {
+    private: {
+        cur: 0,
+        windowlist:
+            []
+    },
+    computed: {
+        current() {
+            if (this.windowlist.length > 0) {
+                return this.windowlist[this.cur]
+            }
+            else
+                return {
+                    hwnd: 0,
+                    title: '空',
+                    proc: '空',
+                    pid: 0,
+                    size: {
+                        left: 0,
+                        top: 0,
+                        width: 0,
+                        height: 0
+                    },
+                    state: '窗口不存在'
+                }
+        }
+    },
+    onReady() {
+        state = new BroadcastChannel('statechannel')
+        const self = this
+        state.onmessage = function (event) {
+                console.log(event)
+            if (event.data.kind == "rec") {
+                let hwnd=self.current.hwnd
+                self.windowlist =[]
+                let res = JSON.parse(event.data.value)
+                if (res.kind == "s") {
+                    self.windowlist = res.data
+                    for(let i=0;i<self.windowlist.length;i++)
+                    {
+                    if(hwnd==self.windowlist[i].hwnd)
+                    {
+                    self.cur=i
+                    return 
+                    }
+             
+                    }
+                    self.cur=0
+                }
+                
+            }
+
+        }.bind(this)
+    },
+    onDestroy() {
+        if (state)
+            state.close()
+    },
+    getactive()
+    {
+        if(this.windowlist.length==0)
+        {
+            prompt.showToast({ message: '没有活动的窗口' })
+            return 
+        }
+        for(let i=0;i<this.windowlist.length;i++)
+        {
+            if(this.windowlist[i].state=="活动窗口")
+            {
+                this.cur=i
+                return  
+            }
+        }
+
+    },
+    wincon(ope) {
+        $socket.send(
+            {
+                kind: 's',
+                data: {
+                    hwnd: this.current.hwnd,
+                    operate: ope
+                }
+            })
+    },
+    winchange(e) {
+        this.cur = e.newValue
+    }
+};
+</script>

@@ -1,0 +1,161 @@
+<template>
+  <div class="hor-page">
+    <title-bar title="网络绑定" show-back="{{true}}" show-right="{{true}}"></title-bar>
+    <div class="line" id="tag">
+      <my-select list-data="{{list}}" onchange="addresschange"></my-select>
+    </div>
+    <div class="line">
+      <div class="clickable bt-6 btn-con"  onclick="connect">
+        <my-icon type="link" color="#ffffff" size="35"></my-icon>
+        <text>链接</text>
+      </div>
+      <div class="clickable bt-6 btn-con" onclick="closecon">
+        <my-icon type="close-circle-outline" color="#ffffff" size="35"></my-icon>
+        <text>断开</text>
+      </div>
+
+    </div>
+    <div class="line">
+      <input id='word' type="text" value="{{word}}" placeholder="发送文字与字符" onchange="wordchange"></input>
+      <input type="button" class="clickable bt-2" value="发送" onclick="send"></input>
+    </div>
+    <div class="body">
+      <div class="labhead">
+        <label>状态记录</label>
+      </div>
+      <list class="list">
+        <list-item class="list-item line-bottom" for="{{record}}" type="li">
+          <text class="list-text">{{$item}}</text>
+        </list-item>
+      </list>
+    </div>
+  </div>
+
+</template>
+
+<import name="my-spin" src="apex-ui/components/spin/index"></import>
+<import name="my-icon" src="apex-ui/components/icon/index"></import>
+<import name="title-bar" src="../../components/common/bar/title-bar"></import>
+<import name="my-select" src="../../components/common/select"></import>
+ 
+<style lang="less">
+@import "../../assets/styles/self.less";
+#word
+{
+  width: 75%;
+}
+
+.clickable text
+{
+  font-size: 35px;
+}
+.body {
+  background-color: #f8f8f9;
+  margin: 15px 15px 0px 15px;
+  flex-direction: column;
+}
+
+.sel {
+  width: 100%;
+  border-radius: 5px;
+  background-color: #ffffff;
+  font-size: 30px;
+}
+
+.body {
+  background-color: #f8f8f9;
+  margin: 15px 15px 0px 15px;
+  flex-direction: column;
+}
+.labhead {
+  margin: 5px;
+  background-color: #5cadff;
+  height: 80px;
+  label {
+    margin-left: 5px;
+    color: #ffffff;
+    font-size: 35px;
+  }
+}
+
+.list {
+  width: 100%;
+  height: 600px;
+}
+
+.list-item {
+  margin: 0, 10px, 0, 10px;
+  background-color: #ffffff;
+  height: 60px;
+}
+
+.list-text {
+  text-align: center;
+  font-size: 27px;
+  color: #333;
+}
+</style>
+
+<script>
+import prompt from '@system.prompt'
+let state = null
+
+export default {
+  private: {
+    address: '',
+    word: '',
+    list: [
+      'http://192.168.43.223:6811',
+     'ws://192.168.43.223:6811',
+     'wss://192.168.43.223:6811',
+      'wss://echo.websocket.org',
+    ],
+    record: [
+    ]
+  },
+
+  onReady() {
+    state = new BroadcastChannel('statechannel')
+    const self = this
+    state.onmessage = function (event) {
+      self.record.push(event.data.data)
+    }.bind(this)
+  },
+  onDestroy() {
+    if (state)
+      state.close()
+  },
+  onHide() {
+  },
+  connect() {
+    var reg = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/
+    if (reg.test(this.address)) {
+      $socket.create(this.address)
+    }
+    else {
+      prompt.showToast({ message: 'ip:port地址不正确' })
+    }
+  },
+  closecon() {
+      $socket.close()
+  },
+  wordchange(e)
+  {
+this.word=e.value
+
+  },
+  send() {
+    console.log(this.word)
+    if (this.word != '') {
+      $socket.send({kind:'w',data:this.word})
+      this.word = ''
+    } else {
+      prompt.showToast({ message: '请输入文字' })
+    }
+  },
+  addresschange(e) {
+    this.address = e.detail.data
+    console.log('socket get ', e, this.address)
+  }
+};
+</script>

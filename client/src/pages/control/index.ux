@@ -1,0 +1,80 @@
+<template>
+  <div class="hor-page">
+    <title-bar title="模拟键盘" show-back="{{true}}" show-right="{{true}}"></title-bar><div class="line line-1">
+      <block for="{{list6}}">
+        <div>
+          <my-key word="{{$item.word}}" width="{{$item.width}}" sec="{{$item.sec}}"></my-key>
+        </div>
+      </block>
+    </div>
+    <div class="line line-1">
+      <block for="{{list1}}">
+        <div>
+          <my-key word="{{$item.word}}" width="{{$item.width}}" sec="{{$item.sec}}"></my-key>
+        </div>
+      </block>
+    </div>
+    <div class="line line-1">
+      <block for="{{list2}}">
+        <div>
+          <my-key word="{{$item.word}}" width="{{$item.width}}"></my-key>
+        </div>
+      </block>
+    </div>
+    <div class="line line-1">
+      <block for="{{list3}}">
+        <div>
+          <my-key word="{{$item.word}}" width="{{$item.width}}"></my-key>
+        </div>
+      </block>
+    </div>
+   <div class="line line-1">
+      <block for="{{list4}}">
+        <div>
+          <my-key word="{{$item.word}}" width="{{$item.width}}"></my-key>
+        </div>
+      </block>
+    </div>
+    <div class="line line-1">
+      <block for="{{list5}}">
+        <div>
+          <my-key word="{{$item.word}}" width="{{$item.width}}"></my-key>
+        </div>
+      </block>
+    </div>
+  </div>
+
+</template>
+
+<import name="title-bar" src="../../components/common/bar/title-bar"></import>
+<import name="my-key" src="../../components/button/keybroad"></import> 
+<style lang="less">
+@import "../../assets/styles/self.less";
+.line-1 {
+  height: 100px;
+  background-color: #e9eaec;
+  justify-content: flex-start;
+}
+.body {
+  height: 200px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+</style>
+
+<script>
+
+export default {
+  private: {
+    
+  list1: [{'word':'1','width':1.0,'sec':'!'},{'word':'2','width':1.0,'sec':'@'},{'word':'3','width':1.0,'sec':'#'},{'word':'4','width':1.0,'sec':'$'},{'word':'5','width':1.0,'sec':'%'},{'word':'6','width':1.0,'sec':'^'},{'word':'7','width':1.0,'sec':'&'},{'word':'8','width':1.0,'sec':'*'},{'word':'9','width':1.0,'sec':'('},{'word':'0','width':1.0,'sec':')'},{'word':'Back','width':2.0}],
+list2: [{'word':'Tab','width':1.5},{'word':'q','width':1.0},{'word':'w','width':1.0},{'word':'e','width':1.0},{'word':'r','width':1.0},{'word':'t','width':1.0},{'word':'y','width':1.0},{'word':'u','width':1.0},{'word':'i','width':1.0},{'word':'o','width':1.0},{'word':'p','width':1.0}],
+list3: [{'word':'Caps','width':2},{'word':'a','width':1.0},{'word':'s','width':1.0},{'word':'d','width':1.0},{'word':'f','width':1.0},{'word':'g','width':1.0},{'word':'h','width':1.0},{'word':'j','width':1.0},{'word':'k','width':1.0},{'word':'l','width':1.0},{'word':'del','width':1.0}],
+list4: [{'word':'Shift','width':2.5},{'word':'z','width':1.0},{'word':'x','width':1.0},{'word':'c','width':1.0},{'word':'v','width':1.0},{'word':'b','width':1.0},{'word':'n','width':1.0},{'word':'m','width':1.0},{'word':'↑','width':1.0},{'word':'Enter','width':2.0}],
+list5: [{'word':'Ctrl','width':1.0},{'word':'Win','width':1.0},{'word':'Alt','width':1.0},{'word':'Space','width':6.0},{'word':'←','width':1.0},{'word':'↓','width':1.0},{'word':'→','width':1.0},],
+list6:[{'word':'Esc','width':1.0},{'word':'F1','width':1.0},{'word':'F2','width':1.0},{'word':'F3','width':1.0},{'word':'F4','width':1.0},{'word':'F5','width':1.0},{'word':'F6','width':1.0},{'word':'F7','width':1.0},{'word':'F8','width':1.0},{'word':'F9','width':1.0},{'word':'F10','width':1.0},{'word':'F11','width':1.0},{'word':'F12','width':1.0}]
+
+  },
+};
+</script> 

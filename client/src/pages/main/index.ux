@@ -1,0 +1,214 @@
+<template>
+  <!-- template里只能有一个根节点 -->
+  <div class="demo-page">
+    <!-- 点击跳转详情页 -->
+    <list class="list" onscroll="listscroll">
+      <list-item class="list-item" for="pagelist" type="" onappear="itemappear($idx)" ondisappear="itemdisappear($idx)" onresize="resize($idx)">
+        <div class="list-content" style="margin-left:{{$item.left}}px;" onclick="routeDetail($item.value)" >
+          <div class="item-icon" style="background-image:{{$item.icon}};"></div>
+          <div class="item-title">
+            <text class="item-text">{{$item.title}}</text>
+          </div>
+        </div>
+      </list-item>
+    </list>
+    <my-icon type="" size="48"></my-icon>
+  </div>
+</template>
+<import name="my-icon" src="apex-ui/components/icon/index"></import>
+<script>
+import router from '@system.router'
+function getleft(x) {
+  x=x+50
+  return-x * (x - 800) / 1000 + 200
+}
+export default {
+  // 页面级组件的数据模型，影响传入数据的覆盖机制：private内定义的属性不允许被覆盖
+  private: {
+    title: '示例页面',
+    st: 0,
+    end: 5,
+    ready: false,
+    pagelist: [
+      {
+        title: '蓝牙',
+        value: 'pages/devfind',
+        icon: '/assets/images/bluetooth.png',
+        left: 0,
+        high: 50
+      }, {
+        title: 'socket',
+        value: 'pages/socket',
+        icon: '/assets/images/link.png',
+        left: 0,
+        high: 200
+      },
+      {
+        title: '键盘',
+        value: 'pages/control',
+        icon: '/assets/images/keyboard.png',
+        left: 0,
+        high: 350
+      },
+      {
+        title: '文本',
+        value: 'pages/versentense',
+        icon: '/assets/images/notebook.png',
+        left: 0,
+        high: 650
+      },
+      {
+        title: '鼠标',
+        value: 'pages/mouse',
+        icon: '/assets/images/mouse.png',
+        left: 0,
+        high: 0
+      },
+      {
+        title: '摇杆',
+        value: 'pages/rocker',
+        icon: '/assets/images/rocker-front.png',
+        left: 0,
+        high: 0
+      },
+      {
+        title: '指南针',
+        value: 'pages/compass',
+        icon: '/assets/images/compass.png',
+        left: 0,
+        high: 0
+      },
+      {
+        title: '重力感应',
+        value: 'pages/gravity',
+        icon: '/assets/images/gravity.png',
+        left: 0,
+        high: 0
+      },
+      {
+        title: '窗口进程',
+        value: 'pages/process',
+        icon: '/assets/images/window.png',
+        left: 0,
+        high: 0
+      },
+      {
+        title: '自定义界面',
+        value: 'pages/self',
+        icon: '/assets/images/option.png',
+        left: 0,
+        high: 0
+      }
+    ]
+
+  },
+  routeDetail(x) {
+    // 跳转到应用内的某个页面，router用法详见：文档->接口->页面路由
+    router.push({
+      uri: x
+    })
+  },
+  itemappear(id) {
+    console.log('appear',id)
+    if (id > this.end) {
+      this.end = id
+      this.pagelist[id].high = 800
+      this.pagelist[id].left = getleft(this.pagelist[id].high)
+    }
+    else if(id<this.st){
+      this.st = id
+      this.pagelist[id].high = 0
+       this.pagelist[id].left = getleft(this.pagelist[id].high)
+    }
+  },
+  itemdisappear(id) {
+        console.log('disappear',id) 
+    if (id == this.end) {
+      this.end--
+      this.pagelist[id].high = 800
+      this.pagelist[id].left = getleft(this.pagelist[id].high)
+    }
+    else if(id==this.st) {
+      this.st++
+      this.pagelist[id].high = 0
+      this.pagelist[id].left = getleft(this.pagelist[id].high)
+    }
+  },
+  listscroll(e) {
+    let j=this.st
+    let k=this.end
+    for (let i = j; i <= k; i++) {
+      this.pagelist[i].high -= e.scrollY
+      this.pagelist[i].left = getleft(this.pagelist[i].high)
+    }
+  },
+  resize(id, e) {
+    this.pagelist[id].high = e.offsetTop
+    this.pagelist[id].left = getleft(this.pagelist[id].high)
+  }
+}
+</script>
+
+<style>
+.demo-page {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-image: url('/assets/images/1.png');
+}
+
+.title {
+  font-size: 40px;
+  text-align: center;
+}
+
+.btn {
+  width: 550px;
+  height: 86px;
+  margin-top: 75px;
+  border-radius: 5px;
+  background-color: #2d8cf0;
+  font-size: 30px;
+  color: #ffffff;
+}
+.list {
+  width: 100%;
+  height: 800px;
+  margin: 100px 0px 100px 0px;
+  border-top-right-radius: 300px;
+  border-bottom-right-radius: 300px;
+}
+.list-content {
+
+  width: 50%;
+  height: 100px;
+  margin-bottom: 50px;
+  border-bottom-left-radius: 50px;
+
+   
+
+}
+.item-icon
+{
+  background-position: center;
+  border: 5px solid #2d8cf0;
+  background-size:contain;
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  background-repeat: no-repeat;
+}
+.item-title
+{
+  width: 300px;
+  justify-content: center;
+  border-bottom:  5px solid #2d8cf0;
+}
+.item-text
+{
+  color: #2d8cf0;
+  font-size: 50px;
+  font-style: italic;
+  
+}
+</style>

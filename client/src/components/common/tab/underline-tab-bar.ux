@@ -1,0 +1,60 @@
+<template>
+  <div class="underline-tab-bar" style="flex-direction:{{direct}}">
+    <div class="tab-item" for="tabList" onclick="select($idx)" >
+      <text
+        class="tab-title text-black"
+        style="color: {{$idx === selectedTab ? activatedColor : deactivatedColor}}"
+      >
+        {{ $item }}
+      </text>
+      <div
+        class="tab-line"
+        style="background-color: {{$idx === selectedTab ? activatedColor : 'transparent'}}"
+      ></div>
+    </div>
+</div>
+</template>
+
+<script>
+import router from '@system.router'
+export default {
+  props: {
+    tabList: {},
+    selectedTab: {},
+    deactivatedColor: {
+      default: '#1a1a1a'
+    },
+    activatedColor: {
+      default: '#20a0ff'
+    },
+    direct:{
+      default:"row"
+    }
+  },
+  select(index)
+  {
+    this.$emit('select',index)
+  }
+}
+</script>
+
+<style lang="less">
+@import '../../../assets/styles/index.less';
+
+.underline-tab-bar {
+  background-color: @white;
+  width: 100%;
+  justify-content: space-around;
+  
+  .border-bottom-mixins();
+  .tab-item {
+    .flex-box-mixins(column, flex-end, center);
+    padding: 15px 40px 0 40px;
+    .tab-line {
+      margin-top: 10px;
+      height: 5px;
+      width: 60px;
+    }
+  }
+}
+</style>
